@@ -2,34 +2,37 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Моя VR Игра</title>
+    <title>VR Hand Tracking - Interaction</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/aframe-super-hands@^3.0.3/dist/aframe-super-hands.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-super-hands-component@master/dist/aframe-super-hands.min.js"></script>
   </head>
   <body>
-    <a-scene physics="debug: false">
+    <a-scene physics="driver: local; gravity: -9.8; debug: false">
       
       <a-sky color="#FFFFFF"></a-sky>
       <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100" color="#888888" static-body></a-plane>
 
-      <a-entity id="rig" movement-controls="controls: gamepad; speed: 0.2">
+      <a-entity id="rig" movement-controls="controls: gamepad; speed: 0.15">
         <a-entity camera position="0 1.6 0" look-controls></a-entity>
         
-        <a-entity sphere-collider="objects: a-box" super-hands
-                  hand-tracking-controls="hand: left"
-                  hand-controls="hand: left; handModelStyle: highPoly"></a-entity>
+        <a-entity hand-tracking-controls="hand: left"
+                  sphere-collider="objects: .grabbable" 
+                  super-hands></a-entity>
         
-        <a-entity sphere-collider="objects: a-box" super-hands
-                  hand-tracking-controls="hand: right"
-                  hand-controls="hand: right; handModelStyle: highPoly"></a-entity>
+        <a-entity hand-tracking-controls="hand: right"
+                  sphere-collider="objects: .grabbable" 
+                  super-hands></a-entity>
       </a-entity>
 
-      <a-box position="0 1 -1" color="red" grabbable dynamic-body 
-             scale="0.2 0.2 0.2"></a-box>
+      <a-box class="grabbable" position="-0.5 1 -1" color="red" 
+             scale="0.2 0.2 0.2"
+             grabbable hoverable dynamic-body></a-box>
       
-      <a-box position="0.5 1 -1" color="blue" grabbable dynamic-body 
-             scale="0.2 0.2 0.2"></a-box>
+      <a-box class="grabbable" position="0.5 1 -1" color="blue" 
+             scale="0.2 0.2 0.2"
+             grabbable hoverable dynamic-body></a-box>
 
     </a-scene>
   </body>
