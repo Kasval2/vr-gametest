@@ -2,40 +2,31 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Quest 3S - Hand Tracking Custom</title>
+    <title>Quest 3S - Debug Touch</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script>
-      // Скрипт "Липучка"
-      AFRAME.registerComponent('hand-grabber', {
+      AFRAME.registerComponent('touch-magnet', {
         init: function () {
           this.grabbedEl = null;
-
-          // Когда пальцы сжимаются (Pinch)
-          this.el.addEventListener('pinchstarted', (evt) => {
-            const handPos = this.el.object3D.position;
-            const targets = document.querySelectorAll('.grabbable');
-            
-            targets.forEach(target => {
-              const targetPos = target.object3D.position;
-              const dist = handPos.distanceTo(targetPos);
-              
-              // Если рука ближе 20см к кубу - берем его
-              if (dist < 0.2) {
-                this.grabbedEl = target;
-              }
-            });
-          });
-
-          // Когда пальцы разжимаются
-          this.el.addEventListener('pinchend', () => {
-            this.grabbedEl = null;
-          });
         },
         tick: function () {
-          if (this.grabbedEl) {
-            // Копируем позицию руки в позицию куба
-            this.grabbedEl.object3D.position.copy(this.el.object3D.position);
-          }
+          // Ищем все руки на сцене
+          const hands = document.querySelectorAll('[hand-tracking-controls]');
+          const cubePos = this.el.object3D.position;
+
+          hands.forEach(hand => {
+            const handPos = hand.object3D.position;
+            const dist = handPos.distanceTo(cubePos);
+
+            // Если рука ОЧЕНЬ близко (меньше 15 см), куб "прилипает"
+            if (dist < 0.15) {
+              this.el.setAttribute('color', 'yellow'); // Меняем цвет при касании
+              cubePos.copy(handPos); // Куб копирует позицию руки
+            } else {
+              // Если куб красный (исходный), ничего не делаем, 
+              // но если он был желтым и рука ушла — оставляем его там
+            }
+          });
         }
       });
     </script>
@@ -43,20 +34,16 @@
   <body>
     <a-scene>
       <a-sky color="#87CEEB"></a-sky>
-
       <a-plane position="0 0.01 0" rotation="-90 0 0" width="20" height="20" color="#2E8B57"></a-plane>
-      <a-grid position="0 0 0"></a-grid>
 
       <a-entity id="rig">
         <a-entity camera position="0 1.6 0"></a-entity>
-        
-        <a-entity hand-tracking-controls="hand: left" hand-grabber></a-entity>
-        
-        <a-entity hand-tracking-controls="hand: right" hand-grabber></a-entity>
+        <a-entity hand-tracking-controls="hand: left"></a-entity>
+        <a-entity hand-tracking-controls="hand: right"></a-entity>
       </a-entity>
 
-      <a-box class="grabbable" position="0 1.2 -0.4" color="red" scale="0.15 0.15 0.15"></a-box>
-      <a-box class="grabbable" position="0.3 1.2 -0.4" color="blue" scale="0.15 0.15 0.15"></a-box>
+      <a-box touch-magnet position="0 1.2 -0.5" color="red" scale="0.15 0.15 0.15"></a-box>
+      <a-box touch-magnet position="0.5 1.2 -0.5" color="blue" scale="0.15 0.15 0.15"></a-box>
 
     </a-scene>
   </body>
