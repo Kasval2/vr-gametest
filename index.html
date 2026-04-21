@@ -2,34 +2,61 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Quest 3S - Hand Tracking Stable</title>
+    <title>Quest 3S - Hand Tracking Custom</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
+    <script>
+      // Скрипт "Липучка"
+      AFRAME.registerComponent('hand-grabber', {
+        init: function () {
+          this.grabbedEl = null;
+
+          // Когда пальцы сжимаются (Pinch)
+          this.el.addEventListener('pinchstarted', (evt) => {
+            const handPos = this.el.object3D.position;
+            const targets = document.querySelectorAll('.grabbable');
+            
+            targets.forEach(target => {
+              const targetPos = target.object3D.position;
+              const dist = handPos.distanceTo(targetPos);
+              
+              // Если рука ближе 20см к кубу - берем его
+              if (dist < 0.2) {
+                this.grabbedEl = target;
+              }
+            });
+          });
+
+          // Когда пальцы разжимаются
+          this.el.addEventListener('pinchend', () => {
+            this.grabbedEl = null;
+          });
+        },
+        tick: function () {
+          if (this.grabbedEl) {
+            // Копируем позицию руки в позицию куба
+            this.grabbedEl.object3D.position.copy(this.el.object3D.position);
+          }
+        }
+      });
+    </script>
   </head>
   <body>
     <a-scene>
-      
       <a-sky color="#87CEEB"></a-sky>
 
-      <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20" color="#2E8B57"></a-plane>
+      <a-plane position="0 0.01 0" rotation="-90 0 0" width="20" height="20" color="#2E8B57"></a-plane>
+      <a-grid position="0 0 0"></a-grid>
 
       <a-entity id="rig">
-        <a-entity camera position="0 1.6 0" look-controls></a-entity>
+        <a-entity camera position="0 1.6 0"></a-entity>
         
-        <a-entity hand-tracking-controls="hand: left" 
-                  hand-tracking-grab-controls></a-entity>
+        <a-entity hand-tracking-controls="hand: left" hand-grabber></a-entity>
         
-        <a-entity hand-tracking-controls="hand: right" 
-                  hand-tracking-grab-controls></a-entity>
+        <a-entity hand-tracking-controls="hand: right" hand-grabber></a-entity>
       </a-entity>
 
-      <a-box class="grabbable" position="0 1.2 -0.4" color="red" 
-             scale="0.15 0.15 0.15"></a-box>
-             
-      <a-box class="grabbable" position="0.3 1.2 -0.4" color="blue" 
-             scale="0.15 0.15 0.15"></a-box>
-
-      <a-grid></a-grid>
+      <a-box class="grabbable" position="0 1.2 -0.4" color="red" scale="0.15 0.15 0.15"></a-box>
+      <a-box class="grabbable" position="0.3 1.2 -0.4" color="blue" scale="0.15 0.15 0.15"></a-box>
 
     </a-scene>
   </body>
