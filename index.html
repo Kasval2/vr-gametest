@@ -2,45 +2,46 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>VR Hand Tracking Fix</title>
+    <title>VR Hand Tracking - Final Fix</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
-    <script src="https://unpkg.com/aframe-super-hands@^3.0.3/dist/aframe-super-hands.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
+    
+    <script>
+      // Скрипт для простого захвата руками
+      AFRAME.registerComponent('simple-grab', {
+        init: function () {
+          this.el.addEventListener('pinchstarted', (evt) => {
+            // Ищем ближайший кубик при щепке
+            const hands = this.el.getAttribute('hand-tracking-controls').hand;
+            console.log(hands + " hand pinched");
+          });
+        }
+      });
+    </script>
   </head>
   <body>
-    <a-scene physics="driver: local; gravity: -9.8; debug: true">
+    <a-scene physics="driver: local; gravity: -9.8">
       
-      <a-assets>
-        <a-mixin id="cube" 
-                 hoverable grabbable stretchable draggable
-                 dynamic-body 
-                 shadow></a-mixin>
-      </a-assets>
-
       <a-sky color="#ECECEC"></a-sky>
       <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20" color="#7BC8A4" static-body></a-plane>
 
-      <a-entity id="rig" movement-controls="speed: 0.15">
+      <a-entity id="rig">
         <a-entity camera position="0 1.6 0" look-controls></a-entity>
         
-        <a-entity hand-tracking-controls="hand: left"
-                  super-hands="colliderEvent: raycaster-intersection;
-                               colliderEventProperty: els;
-                               colliderEndEvent: raycaster-intersection-cleared;
-                               colliderEndEventProperty: clearedEls;"
-                  sphere-collider="objects: .grabbable; radius: 0.15"></a-entity>
+        <a-entity hand-tracking-controls="hand: left" 
+                  hand-tracking-grab-controls></a-entity>
         
-        <a-entity hand-tracking-controls="hand: right"
-                  super-hands="colliderEvent: raycaster-intersection;
-                               colliderEventProperty: els;
-                               colliderEndEvent: raycaster-intersection-cleared;
-                               colliderEndEventProperty: clearedEls;"
-                  sphere-collider="objects: .grabbable; radius: 0.15"></a-entity>
+        <a-entity hand-tracking-controls="hand: right" 
+                  hand-tracking-grab-controls></a-entity>
       </a-entity>
 
-      <a-box class="grabbable" mixin="cube" position="0 1 -0.5" color="red" scale="0.2 0.2 0.2"></a-box>
-      <a-box class="grabbable" mixin="cube" position="0.5 1 -0.5" color="blue" scale="0.2 0.2 0.2"></a-box>
+      <a-box class="grabbable" position="0 1.2 -0.5" color="red" 
+             scale="0.2 0.2 0.2" 
+             dynamic-body="shape: box; mass: 1"></a-box>
+             
+      <a-box class="grabbable" position="0.5 1.2 -0.5" color="blue" 
+             scale="0.2 0.2 0.2" 
+             dynamic-body="shape: box; mass: 1"></a-box>
 
     </a-scene>
   </body>
