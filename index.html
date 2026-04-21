@@ -2,57 +2,72 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Quest 3S - Direct Finger Touch</title>
+    <title>Quest 3S - Hand Physics Pro</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script>
-      AFRAME.registerComponent('xr-finger-test', {
+      AFRAME.registerComponent('pro-grab', {
+        init: function () {
+          this.grabbed = false;
+          this.activeHand = null;
+        },
         tick: function () {
           const scene = this.el.sceneEl;
           const frame = scene.frame;
           const session = scene.xrSession;
-          
-          if (session && frame) {
-            // Ищем все устройства ввода (руки)
-            for (const inputSource of session.inputSources) {
-              if (inputSource.hand) {
-                // Берем кончик указательного пальца (index-finger-tip)
-                const joint = inputSource.hand.get('index-finger-tip');
-                if (joint) {
-                  const pose = frame.getJointPose(joint, scene.renderer.xr.getReferenceSpace());
-                  if (pose) {
-                    const fingerPos = pose.transform.position;
-                    const cubePos = this.el.object3D.position;
-                    
-                    // Считаем расстояние вручную
-                    const dx = fingerPos.x - cubePos.x;
-                    const dy = fingerPos.y - cubePos.y;
-                    const dz = fingerPos.z - cubePos.z;
-                    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
 
-                    if (dist < 0.1) {
-                      this.el.setAttribute('color', 'pink');
-                      this.el.setAttribute('scale', '0.5 0.5 0.5');
-                      return; // Нашли касание, выходим
+          if (!session || !frame) return;
+
+          for (const inputSource of session.inputSources) {
+            if (inputSource.hand) {
+              const tip = inputSource.hand.get('index-finger-tip');
+              const thumb = inputSource.hand.get('thumb-tip');
+              
+              if (tip && thumb) {
+                const tipPose = frame.getJointPose(tip, scene.renderer.xr.getReferenceSpace());
+                const thumbPose = frame.getJointPose(thumb, scene.renderer.xr.getReferenceSpace());
+
+                if (tipPose && thumbPose) {
+                  const tPos = tipPose.transform.position;
+                  const thPos = thumbPose.transform.position;
+                  const cubePos = this.el.object3D.position;
+
+                  // 1. Считаем расстояние от пальцев до куба
+                  const distToCube = Math.sqrt(Math.pow(tPos.x - cubePos.x, 2) + Math.pow(tPos.y - cubePos.y, 2) + Math.pow(tPos.z - cubePos.z, 2));
+                  
+                  // 2. Считаем расстояние МЕЖДУ указательным и большим (щипок)
+                  const pinchDist = Math.sqrt(Math.pow(tPos.x - thPos.x, 2) + Math.pow(tPos.y - thPos.y, 2) + Math.pow(tPos.z - thPos.z, 2));
+
+                  // Если пальцы близко к кубу и они сжаты (pinch < 2см)
+                  if (distToCube < 0.15 && pinchDist < 0.025) {
+                    this.grabbed = true;
+                    this.el.setAttribute('color', '#FFD700'); // Золотой при захвате
+                    // Куб плавно следует за центром между пальцами
+                    cubePos.set((tPos.x + thPos.x)/2, (tPos.y + thPos.y)/2, (tPos.z + thPos.z)/2);
+                  } else {
+                    if (this.grabbed) {
+                      this.el.setAttribute('color', '#4CC3D9'); // Возвращаем цвет
+                      this.grabbed = false;
                     }
                   }
                 }
               }
             }
           }
-          // Если касания нет - возвращаем исходный вид
-          this.el.setAttribute('color', 'cyan');
-          this.el.setAttribute('scale', '0.3 0.3 0.3');
         }
       });
     </script>
   </head>
   <body>
-    <a-scene>
-      <a-sky color="#000"></a-sky>
-      <a-box xr-finger-test position="0 1.4 -0.5" color="cyan" width="0.3" height="0.3" depth="0.3"></a-box>
+    <a-scene background="color: #111">
+      <a-entity id="rig">
+        <a-entity camera position="0 1.6 0"></a-entity>
+        <a-entity hand-tracking-controls="hand: left; modelStyle: mesh; modelColor: white"></a-entity>
+        <a-entity hand-tracking-controls="hand: right; modelStyle: mesh; modelColor: white"></a-entity>
+      </a-entity>
+
+      <a-box pro-grab position="0 1.3 -0.5" color="#4CC3D9" width="0.2" height="0.2" depth="0.2"></a-box>
       
-      <a-entity hand-tracking-controls="hand: left"></a-entity>
-      <a-entity hand-tracking-controls="hand: right"></a-entity>
+      <a-grid></a-grid>
     </a-scene>
   </body>
 </html>
