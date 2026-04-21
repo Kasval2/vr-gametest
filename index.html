@@ -2,28 +2,16 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>VR Hand Tracking - Final Fix</title>
+    <title>Quest 3S - Hand Tracking Stable</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
-    
-    <script>
-      // Скрипт для простого захвата руками
-      AFRAME.registerComponent('simple-grab', {
-        init: function () {
-          this.el.addEventListener('pinchstarted', (evt) => {
-            // Ищем ближайший кубик при щепке
-            const hands = this.el.getAttribute('hand-tracking-controls').hand;
-            console.log(hands + " hand pinched");
-          });
-        }
-      });
-    </script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
   </head>
   <body>
-    <a-scene physics="driver: local; gravity: -9.8">
+    <a-scene>
       
-      <a-sky color="#ECECEC"></a-sky>
-      <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20" color="#7BC8A4" static-body></a-plane>
+      <a-sky color="#87CEEB"></a-sky>
+
+      <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20" color="#2E8B57"></a-plane>
 
       <a-entity id="rig">
         <a-entity camera position="0 1.6 0" look-controls></a-entity>
@@ -35,13 +23,13 @@
                   hand-tracking-grab-controls></a-entity>
       </a-entity>
 
-      <a-box class="grabbable" position="0 1.2 -0.5" color="red" 
-             scale="0.2 0.2 0.2" 
-             dynamic-body="shape: box; mass: 1"></a-box>
+      <a-box class="grabbable" position="0 1.2 -0.4" color="red" 
+             scale="0.15 0.15 0.15"></a-box>
              
-      <a-box class="grabbable" position="0.5 1.2 -0.5" color="blue" 
-             scale="0.2 0.2 0.2" 
-             dynamic-body="shape: box; mass: 1"></a-box>
+      <a-box class="grabbable" position="0.3 1.2 -0.4" color="blue" 
+             scale="0.15 0.15 0.15"></a-box>
+
+      <a-grid></a-grid>
 
     </a-scene>
   </body>
