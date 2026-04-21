@@ -2,41 +2,43 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Quest 3S - Absolute Stability</title>
+    <title>Quest 3S Touch Test</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent('color-on-touch', {
+        tick: function () {
+          const mesh = this.el.getObject3D('mesh');
+          const hands = document.querySelectorAll('[hand-tracking-controls]');
+          let isTouching = false;
+
+          hands.forEach(hand => {
+            // Берем позицию кости или центра ладони
+            const handPos = hand.object3D.position;
+            const dist = handPos.distanceTo(this.el.object3D.position);
+            
+            if (dist < 0.25) isTouching = true; 
+          });
+
+          if (isTouching) {
+            this.el.setAttribute('color', '#00FF00'); // Зеленый
+            this.el.setAttribute('scale', '0.5 0.5 0.5');
+          } else {
+            this.el.setAttribute('color', '#FF4500'); // Оранжевый
+            this.el.setAttribute('scale', '0.3 0.3 0.3');
+          }
+        }
+      });
+    </script>
   </head>
   <body>
-    <a-scene vr-mode-ui="enabled: true">
-      
-      <a-sky color="#222"></a-sky>
-      
-      <a-entity geometry="primitive: plane; width: 20; height: 20"
-                material="color: #333; shader: flat"
-                rotation="-90 0 0"></a-entity>
-      <a-entity gridhelper="size: 20; divisions: 20"></a-entity>
-
+    <a-scene background="color: #111">
       <a-entity id="rig">
-        <a-entity camera position="0 1.6 0" look-controls></a-entity>
-        
-        <a-entity oculus-touch-controls="hand: left"></a-entity>
-        <a-entity oculus-touch-controls="hand: right"></a-entity>
-        
+        <a-entity camera position="0 1.6 0"></a-entity>
         <a-entity hand-tracking-controls="hand: left"></a-entity>
         <a-entity hand-tracking-controls="hand: right"></a-entity>
       </a-entity>
 
-      <a-box id="target" position="0 1.4 -0.5" color="orange" width="0.3" height="0.3" depth="0.3"
-             animation="property: rotation; to: 0 360 0; loop: true; dur: 5000">
-      </a-box>
-
+      <a-box color-on-touch position="0 1.4 -0.5" color="#FF4500" width="0.3" height="0.3" depth="0.3"></a-box>
     </a-scene>
-
-    <script>
-      // Скрипт-проверка: выведет в консоль браузера (если смотреть через ПК), 
-      // видит ли сцена вход в VR
-      document.querySelector('a-scene').addEventListener('enter-vr', function () {
-        console.log("ВНИМАНИЕ: Шлем вошел в режим VR!");
-      });
-    </script>
   </body>
 </html>
