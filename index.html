@@ -2,34 +2,8 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Quest 3S - Debug Touch</title>
+    <title>Quest 3S - Raycaster Fix</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script>
-      AFRAME.registerComponent('touch-magnet', {
-        init: function () {
-          this.grabbedEl = null;
-        },
-        tick: function () {
-          // Ищем все руки на сцене
-          const hands = document.querySelectorAll('[hand-tracking-controls]');
-          const cubePos = this.el.object3D.position;
-
-          hands.forEach(hand => {
-            const handPos = hand.object3D.position;
-            const dist = handPos.distanceTo(cubePos);
-
-            // Если рука ОЧЕНЬ близко (меньше 15 см), куб "прилипает"
-            if (dist < 0.15) {
-              this.el.setAttribute('color', 'yellow'); // Меняем цвет при касании
-              cubePos.copy(handPos); // Куб копирует позицию руки
-            } else {
-              // Если куб красный (исходный), ничего не делаем, 
-              // но если он был желтым и рука ушла — оставляем его там
-            }
-          });
-        }
-      });
-    </script>
   </head>
   <body>
     <a-scene>
@@ -37,13 +11,26 @@
       <a-plane position="0 0.01 0" rotation="-90 0 0" width="20" height="20" color="#2E8B57"></a-plane>
 
       <a-entity id="rig">
-        <a-entity camera position="0 1.6 0"></a-entity>
-        <a-entity hand-tracking-controls="hand: left"></a-entity>
-        <a-entity hand-tracking-controls="hand: right"></a-entity>
+        <a-entity camera position="0 1.6 0" look-controls></a-entity>
+        
+        <a-entity hand-tracking-controls="hand: left"
+                  raycaster="objects: .grabbable; far: 2"
+                  line="color: red; opacity: 0.5"></a-entity>
+        
+        <a-entity hand-tracking-controls="hand: right"
+                  raycaster="objects: .grabbable; far: 2"
+                  line="color: red; opacity: 0.5"></a-entity>
       </a-entity>
 
-      <a-box touch-magnet position="0 1.2 -0.5" color="red" scale="0.15 0.15 0.15"></a-box>
-      <a-box touch-magnet position="0.5 1.2 -0.5" color="blue" scale="0.15 0.15 0.15"></a-box>
+      <a-box class="grabbable" position="0 1.2 -0.5" color="red" scale="0.15 0.15 0.15"
+             animation__hover="property: scale; to: 0.2 0.2 0.2; startEvents: raycaster-intersection; pauseEvents: raycaster-intersection-cleared; dur: 200"
+             animation__out="property: scale; to: 0.15 0.15 0.15; startEvents: raycaster-intersection-cleared; dur: 200">
+      </a-box>
+      
+      <a-box class="grabbable" position="0.5 1.2 -0.5" color="blue" scale="0.15 0.15 0.15"
+             animation__hover="property: scale; to: 0.2 0.2 0.2; startEvents: raycaster-intersection; pauseEvents: raycaster-intersection-cleared; dur: 200"
+             animation__out="property: scale; to: 0.15 0.15 0.15; startEvents: raycaster-intersection-cleared; dur: 200">
+      </a-box>
 
     </a-scene>
   </body>
